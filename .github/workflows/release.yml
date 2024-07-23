@@ -24,7 +24,7 @@ jobs:
 
               const response = await fetch(url);
               if (!response.ok) {
-                throw new Error(`Error response status: ${response.status}`);
+                console.log(`Error response status: ${response.status}`);
               }
 
               const json = await response.json();
@@ -51,6 +51,9 @@ jobs:
             while (!found && count < RETRIES) {
               await new Promise((r) => setTimeout(r, 60000));
               found = await verifyPublication(TARGET_VERSION, REGISTRY);
+              if (!found) {
+                console.log(`Publication of v${TARGET_VERSION} on ${REGISTRY} isn't found, retrying...`)
+              }
             }
             if (found) {
               console.log(

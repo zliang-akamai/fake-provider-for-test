@@ -31,7 +31,7 @@ jobs:
 
               return json.versions.find((v) => v.version == targetVersion) != null;
             }
-            
+
             let prefix = "refs/tags/v";
             if (!context.ref.startsWith(prefix)) {
               throw new Error(`Invalid ref: ${context.ref}`);
@@ -44,16 +44,20 @@ jobs:
             const RETRIES = 180;
             const RETRY_INTERVAL = 60000;
 
-            console.log(`Verifying publication of v${TARGET_VERSION} on ${REGISTRY}`)
+            console.log(`Verifying publication of v${TARGET_VERSION} on ${REGISTRY}`);
 
             let found = false;
             let count = 0;
             while (!found && count < RETRIES) {
-              await new Promise((r) => setTimeout(r, 60000));
+              count++;
               found = await verifyPublication(TARGET_VERSION, REGISTRY);
-              if (!found) {
-                console.log(`Publication of v${TARGET_VERSION} on ${REGISTRY} isn't found, retrying...`)
+              if (found) {
+                break;
               }
+              console.log(
+                `Publication of v${TARGET_VERSION} on ${REGISTRY} isn't found, retrying in ${RETRY_INTERVAL} ms...`
+              );
+              await new Promise((r) => setTimeout(r, RETRY_INTERVAL));
             }
             if (found) {
               console.log(
@@ -64,4 +68,5 @@ jobs:
                 `Timeout waiting for Linode Provider v${TARGET_VERSION} publication on ${REGISTRY}`
               );
             }
+
 
